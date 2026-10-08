@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Python and PostgreSQL checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      UV_LOCKED: "true"
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/chainsec_test
+      TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/chainsec_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: chainsec_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d chainsec_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --locked
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy
+
+      - name: Apply migrations
+        run: uv run alembic upgrade head
+
+      - name: Show migration revision
+        run: uv run alembic current
+
+      - name: Check schema drift
+        run: uv run alembic check
+
+      - name: PostgreSQL test suite
+        run: uv run pytest -q
