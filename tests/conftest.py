@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from alembic import command
 from app.core.config import Settings
 from app.db.models.raw_document import RawDocument
+from app.extraction.schemas import ExtractionRunCreate
 from app.main import create_app
 from app.schemas.documents import DocumentCreate
 from app.services.documents import create_document
@@ -50,6 +51,7 @@ async def session_factory(database_url: str) -> AsyncIterator[async_sessionmaker
     try:
         async with engine.begin() as connection:
             await connection.execute(text("DELETE FROM security_findings"))
+            await connection.execute(text("DELETE FROM extraction_runs"))
             await connection.execute(text("DELETE FROM raw_documents"))
         yield async_sessionmaker(engine, expire_on_commit=False)
     finally:
@@ -128,4 +130,31 @@ def finding_payload() -> dict[str, object]:
                 "source_excerpt": "The protocol uses the current pool price.",
             }
         ],
+    }
+
+
+@pytest.fixture
+def extraction_metadata() -> ExtractionRunCreate:
+    return ExtractionRunCreate(
+        provider="fixture-provider",
+        model="fixture-model",
+        prompt_version="extract-findings-v1",
+        schema_version="finding-output-v1",
+    )
+
+
+@pytest.fixture
+def extraction_output() -> dict[str, object]:
+    return {
+        "findings": [
+            {
+                "source_finding_id": "H-01",
+                "source_category": " Oracle Manipulation ",
+                "source_severity": " Major ",
+                "title": "Spot price manipulation",
+                "severity": "HIGH",
+                "canonical_category": "ORACLE_PRICE_MANIPULATION",
+                "evidence": [{"source_excerpt": "Report.", "start_offset": 2, "end_offset": 9}],
+            }
+        ]
     }

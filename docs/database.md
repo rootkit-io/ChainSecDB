@@ -19,7 +19,8 @@ remains unchanged:
 | `created_at` | TIMESTAMP WITH TIME ZONE | Required, database `now()` default |
 
 Alembic also maintains its `alembic_version` tracking table. Phase 1B adds the two
-tables below. There are no extraction-run, taxonomy lookup, or vector tables.
+finding tables below. Phase 1C.1 adds extraction runs; there are no taxonomy lookup
+or vector tables.
 
 PostgreSQL stores timezone-aware timestamps as instants; API input and output use
 UTC. `retrieved_at` is caller-supplied provenance, while `created_at` records insertion
@@ -37,6 +38,7 @@ Migration `0002_findings_taxonomy` adds:
 | --- | --- | --- |
 | `id` | UUID | Primary key, required; application UUID v4 |
 | `raw_document_id` | UUID | Required FK to `raw_documents.id`, `ON DELETE RESTRICT` |
+| `extraction_run_id` | UUID | Nullable, added in `0003`; indexed, RESTRICT composite FK to the run and its document |
 | `source_finding_id` | VARCHAR(255) | Nullable; unique with `raw_document_id` when non-null |
 | `source_title` | VARCHAR(500) | Nullable, original source text |
 | `source_severity` | VARCHAR(255) | Nullable, original source text |
@@ -115,6 +117,53 @@ Deduplication is global to raw content, independent of source metadata. A reject
 duplicate does not add another provenance record or update the existing row.
 Multiple-source attribution is not modeled in Phase 1A.
 
+## Extraction runs
+
+Migration `0003_extraction_runs` adds `extraction_runs` and the nullable finding link.
+
+| Column | PostgreSQL type | Constraints/default |
+| --- | --- | --- |
+| `id` | UUID | Required primary key; application UUID v4 |
+| `raw_document_id` | UUID | Required, indexed FK to `raw_documents.id`, `ON DELETE RESTRICT` |
+| `provider`, `model` | VARCHAR(255) | Required, nonblank CHECK; independent validated strings |
+| `prompt_version`, `schema_version` | VARCHAR(255) | Required, nonblank CHECK; opaque identifiers |
+| `status` | VARCHAR(16) | Required, allowed-value CHECK, `PENDING` default |
+| `started_at`, `completed_at` | TIMESTAMP WITH TIME ZONE | Nullable; lifecycle and ordering CHECKs |
+| `failure_code` | VARCHAR(64) | Nullable; permitted only when FAILED |
+| `failure_message` | VARCHAR(500) | Nullable; permitted only when FAILED |
+| `created_at`, `updated_at` | TIMESTAMP WITH TIME ZONE | Required, `now()` defaults; ORM updates `updated_at` |
+
+Database lifecycle shapes are enforced:
+
+- `PENDING`: both lifecycle timestamps null.
+- `RUNNING`: start present, completion null.
+- `SUCCEEDED`/`FAILED`: both present, completion at or after start.
+- Failure fields must be null outside `FAILED`; the service always fills both on failure.
+
+The service enforces transition history and server-owned UTC timestamps. CHECKs
+enforce state shape, not an old-state/new-state transition machine. Direct SQL is
+a trusted administrative boundary and can bypass service-level transition rules.
+
+`(id, raw_document_id)` is unique to support the composite finding FK
+`(extraction_run_id, raw_document_id) -> extraction_runs(id, raw_document_id)`.
+This rejects cross-document provenance links, restricts deletion of referenced
+runs, and permits manual findings with a null run ID. There is no uniqueness on
+document/provider/model/prompt/schema configuration: separate runs are distinct
+historical records. Existing source-ID uniqueness remains authoritative.
+
+Schema/evidence rejection commits only a failed run. Candidate inserts occur in
+one savepoint under the run's outer row lock. Duplicate source IDs, including IDs
+already used by manual findings, roll back the whole batch and record
+`DUPLICATE_SOURCE_FINDING`; other recoverable insert errors record `PERSISTENCE_ERROR`.
+Success commits all findings/evidence and `SUCCEEDED` together. Both paths use fixed
+sanitized failure messages, never exception strings.
+
+If the outer transaction or connection fails, the service raises a sanitized
+persistence error and does not attempt an automatic retry or terminal-state rewrite.
+A definite rollback leaves the run `RUNNING` with no new findings. A connection
+loss during commit can leave the commit outcome unknown; inspect persisted state
+before any future reconciliation. Recovery automation is outside Phase 1C.1.
+
 ## Migrations
 
 Set `DATABASE_URL` through `.env` or the environment, then run:
@@ -125,8 +174,9 @@ uv run alembic current
 uv run alembic check
 ```
 
-The current revision is `0002_findings_taxonomy`, whose `down_revision` is
-`0001_raw_documents`. A clean database upgrades through both revisions.
+The current revision is `0003_extraction_runs`, whose `down_revision` is
+`0002_findings_taxonomy`. A clean database upgrades through `0001_raw_documents`,
+`0002_findings_taxonomy`, and `0003_extraction_runs`.
 `alembic check` compares the migrated
 schema with SQLAlchemy metadata for unexpected differences. The async Alembic
 environment reads the same required configuration as the application.
@@ -145,6 +195,20 @@ uv run alembic upgrade head
 **Downgrading Phase 1B deletes findings and evidence**, while preserving the raw
 document table and its rows. Re-upgrade recreates empty finding/evidence tables.
 Published migration `0001_raw_documents` is never edited or regenerated.
+
+Phase 1C.1 can be reversed on a disposable database:
+
+```sh
+uv run alembic downgrade 0002_findings_taxonomy
+uv run alembic upgrade head
+```
+
+**Downgrading `0003` deletes extraction runs and finding-to-run links.** Documents,
+findings, and evidence remain, but extraction provenance is lost, including links
+on extracted findings. Re-upgrade recreates empty runs and null links; it cannot
+restore that history. Back up provenance before any real downgrade. Published
+`0001` and `0002` migrations remain unchanged. Integration tests exercise the full
+clean chain and `0003 -> 0002 -> 0003` with pre-existing Phase 1B rows preserved.
 
 The initial migration supports downgrade. **Downgrading to `base` drops
 `raw_documents` and permanently deletes its rows.** Exercise downgrade checks only

@@ -134,6 +134,7 @@ class FindingDetail(FindingFields):
 
     id: UUID
     raw_document_id: UUID
+    extraction_run_id: UUID | None
     verification_status: VerificationStatus
     created_at: AwareDatetime
     updated_at: AwareDatetime

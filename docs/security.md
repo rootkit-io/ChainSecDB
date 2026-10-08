@@ -5,7 +5,7 @@
 ## Scope
 
 ChainSecDB currently stores research evidence. It does not audit contracts, execute
-exploit PoCs, evaluate smart-contract code, or make security assessments. Phases 1A/1B
+exploit PoCs, evaluate smart-contract code, or make security assessments. It
 has no authentication or authorization; use it within a trusted development
 environment. It is not a production security service.
 
@@ -13,7 +13,7 @@ environment. It is not a production security service.
 
 Document text, finding fields, evidence, source metadata, timestamps, and identifiers
 are untrusted input.
-Pydantic validates them before the document service persists anything.
+Pydantic validates them before persistence.
 
 - Required metadata is trimmed and checked for blank/oversized values.
 - Raw text is checked for blank content, valid UTF-8, PostgreSQL-incompatible NUL
@@ -66,6 +66,42 @@ the API exposes no document-text update operation.
 A content hash identifies bytes; it does not establish that a report is authentic,
 accurate, complete, or authored by its claimed source. Future derived interpretations
 must retain evidence references and their own verification state.
+
+## Extraction output
+
+Phase 1C.1 has no provider implementation and makes no LLM calls. Its internal
+service accepts untrusted structured objects, not provider responses or arbitrary
+code. It does not fetch URLs, evaluate text, or execute Solidity. There is no
+HTTP endpoint for starting extraction or manipulating run states.
+
+The extraction schema reuses Phase 1B finding fields, enums, and text validation.
+Unknown fields are forbidden, including IDs, lifecycle timestamps, verification
+state, and model-response/reasoning fields. Nested model instances are revalidated
+to catch mutations. Every extracted finding requires 1–100 evidence items with
+explicit strict integer offsets; output contains at most 100 findings. An empty
+finding list is valid and can succeed. Existing per-field text limits apply.
+
+Each excerpt must equal `raw_text[start_offset:end_offset]`, using Unicode code
+points and an exclusive end. Offsets must be nonnegative, ordered, and within the
+document. No inference, relocation, case folding, whitespace rewriting, fuzzy
+matching, or Unicode normalization occurs. Exact containment does not prove the
+truth of a finding or semantic support for every populated field.
+
+All persisted findings explicitly begin `UNREVIEWED`, with a run UUID supplied by
+the service. Manual findings keep null run IDs and optional evidence. There is no
+review workflow, automatic verification, or model-controlled status.
+
+Failure recording accepts only six operational codes: `PROVIDER_ERROR`, `TIMEOUT`,
+`INVALID_OUTPUT`, `EVIDENCE_MISMATCH`, `DUPLICATE_SOURCE_FINDING`, and
+`PERSISTENCE_ERROR`. Messages are fixed, bounded strings. Arbitrary exception text,
+provider messages, headers, credentials, environment values, and stack traces are
+not accepted or persisted. Raw model output, hidden reasoning, prompts, and request
+payloads have no storage fields. Provider/model/version strings are caller-declared
+provenance, not independently verified identities or a schema-version dispatcher.
+
+The service does not log document bodies, evidence excerpts, or structured output.
+See [transaction failure limits](database.md#extraction-runs) for commit ambiguity
+and runs that may remain `RUNNING` after an outer database failure.
 
 ## Errors and logs
 
