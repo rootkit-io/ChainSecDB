@@ -82,5 +82,5 @@ async def test_migrated_schema(session: AsyncSession) -> None:
             assert item["type"].timezone
     assert (
         await session.scalar(text("SELECT version_num FROM alembic_version"))
-        == "0001_raw_documents"
+        == "0002_findings_taxonomy"
     )

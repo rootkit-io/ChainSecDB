@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Taxonomy direction](taxonomy.md)
 
-Only **Phase 1A** is implemented. Subsequent phases are planned or exploratory.
+**Phases 1A and 1B** are implemented. Subsequent phases are planned or exploratory.
 Each phase should be independently scoped and verified before adding further
 automation.
 
@@ -17,16 +17,17 @@ automation.
 
 This is the provenance foundation for later interpretation.
 
-## Phase 1B — Structured security findings: planned
+## Phase 1B — Structured security findings: implemented
 
-- Normalized finding records referencing original documents.
+- Manually supplied normalized finding records referencing original documents.
 - Preservation of upstream taxonomy and severity labels.
-- Canonical vulnerability taxonomy with explicit source-to-canonical mappings.
-- Field-level supporting evidence.
-- Human verification state.
+- Twenty canonical categories, explicitly assigned by the caller without automatic mapping.
+- Field-level source evidence with exact, mechanically checked offsets.
+- Server-controlled verification status, always `UNREVIEWED` at creation.
+- Atomic creation, per-document source-ID deduplication, and provenance constraints.
 
-The intended [taxonomy principles](taxonomy.md) preserve upstream information and
-allow uncertainty. No canonical categories or schema have been chosen yet.
+The [taxonomy definitions](taxonomy.md) preserve upstream information independently
+from normalization. There is no review workflow or automated classification.
 
 ## Phase 1C — AI-assisted extraction: planned
 
@@ -55,7 +56,8 @@ flowchart TD
     Incidents[Incident and exploit evidence] --> Intel
 ```
 
-This diagram describes future direction, not current backend capabilities.
+The incident and correlation portions describe future direction. Current document,
+finding, taxonomy, and evidence behavior is documented in the [API](api.md).
 Connectors for Solodit, audit repositories, exploit collections, and incident
 registries are not implemented or committed to a specific integration phase.
 
