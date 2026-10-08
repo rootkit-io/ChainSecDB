@@ -118,3 +118,14 @@ and severity values, evidence matching and ambiguity, atomic rollback, source-ID
 conflicts, database checks/foreign keys, and provenance deletion rules.
 
 Migration checks are documented in [database](database.md#migrations).
+
+## Continuous integration
+
+[CI](../.github/workflows/ci.yml) runs on pull requests and pushes to `main`.
+One job uses Python 3.12, locked uv dependencies, and a health-checked PostgreSQL 16
+service with development-only credentials. Separate steps check Ruff lint,
+formatting, mypy, Alembic upgrade/current/schema drift, and the full PostgreSQL-backed
+pytest suite. Outdated lockfiles fail instead of being regenerated.
+
+The workflow has read-only repository permissions and cancels superseded runs
+for the same PR or ref. It does not deploy, publish releases, or run on tag pushes.
