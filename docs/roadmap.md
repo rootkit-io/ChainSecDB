@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Taxonomy direction](taxonomy.md)
 
-**Phases 1A and 1B** are implemented. Subsequent phases are planned or exploratory.
+**Phases 1A, 1B, and 1C.1** are implemented. Subsequent phases are planned or exploratory.
 Each phase should be independently scoped and verified before adding further
 automation.
 
@@ -29,10 +29,21 @@ This is the provenance foundation for later interpretation.
 The [taxonomy definitions](taxonomy.md) preserve upstream information independently
 from normalization. There is no review workflow or automated classification.
 
-## Phase 1C — AI-assisted extraction: planned
+## Phase 1C.1 — Extraction infrastructure: implemented
+
+- Provider/model/prompt/schema provenance in historical extraction-run records.
+- Internal `PENDING -> RUNNING -> SUCCEEDED | FAILED` lifecycle with locked transitions.
+- Strict structured-output validation, required explicit evidence offsets, and bounded lists.
+- Atomic persistence of accepted findings as `UNREVIEWED`, linked to their extraction run.
+- Sanitized failed-run provenance and retry-by-new-run policy; no retry automation.
+
+No provider is implemented and no LLM is called. This is a deterministic internal
+foundation, not functioning AI extraction. Manual Phase 1B endpoints remain compatible.
+
+## Phase 1C.2–1C.3 — Provider integration and evaluation: planned
 
 - Structured, evidence-grounded LLM extraction.
-- Prompt/model versioning and recorded extraction runs.
+- A real provider implementation using the versioned extraction-run boundary.
 - Hallucination checks and explicit uncertainty.
 - Evaluation against human-reviewed findings.
 

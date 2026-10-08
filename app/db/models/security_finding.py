@@ -6,6 +6,7 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    ForeignKeyConstraint,
     String,
     Text,
     UniqueConstraint,
@@ -14,6 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.db.models.extraction_run import ExtractionRun  # noqa: F401
 from app.db.models.finding_evidence import FindingEvidence
 from app.taxonomy.categories import CanonicalCategory, Severity, VerificationStatus
 
@@ -21,6 +23,12 @@ from app.taxonomy.categories import CanonicalCategory, Severity, VerificationSta
 class SecurityFinding(Base):
     __tablename__ = "security_findings"
     __table_args__ = (
+        ForeignKeyConstraint(
+            ["extraction_run_id", "raw_document_id"],
+            ["extraction_runs.id", "extraction_runs.raw_document_id"],
+            name="fk_security_findings_extraction_document",
+            ondelete="RESTRICT",
+        ),
         UniqueConstraint(
             "raw_document_id", "source_finding_id", name="uq_security_findings_document_source_id"
         ),
@@ -34,6 +42,7 @@ class SecurityFinding(Base):
     raw_document_id: Mapped[UUID] = mapped_column(
         ForeignKey("raw_documents.id", ondelete="RESTRICT")
     )
+    extraction_run_id: Mapped[UUID | None] = mapped_column(index=True)
     source_finding_id: Mapped[str | None] = mapped_column(String(255))
     source_title: Mapped[str | None] = mapped_column(String(500))
     source_severity: Mapped[str | None] = mapped_column(String(255))

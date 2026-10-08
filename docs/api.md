@@ -169,7 +169,7 @@ exist, `line_end >= line_start`. Contract locations are metadata, not verified
 against fetched files.
 
 Unknown fields are rejected, including client-supplied IDs, `raw_document_id`,
-creation/update timestamps, and `verification_status`.
+creation/update timestamps, `verification_status`, and `extraction_run_id`.
 
 Findings are created with `UNREVIEWED` verification status. Clients cannot set
 verification state during creation. Supplying `verification_status` with any
@@ -181,7 +181,14 @@ endpoint is implemented. Verification status is readable in finding responses.
 Returns **201 Created** with all finding fields, generated UUID, `raw_document_id`,
 UTC `created_at`/`updated_at`, verification status, and evidence records. The parent
 document body is omitted. Its metadata and raw text remain available through
-`GET /documents/{id}`. Each evidence record contains:
+`GET /documents/{id}`.
+
+Finding creation/retrieval/list responses also expose nullable `extraction_run_id`.
+Manual creation always leaves it null. Findings persisted by the internal extraction
+service reference their run UUID. Clients cannot set this field. Phase 1C.1 adds no
+extraction-trigger, run-lifecycle, or run-inspection HTTP endpoints.
+
+Each evidence record contains:
 
 ```json
 {

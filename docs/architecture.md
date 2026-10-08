@@ -6,8 +6,9 @@
 
 Phase 1A stores original security documents with provenance and deterministic hashes.
 Phase 1B stores manually supplied findings, source and canonical labels, review
-status, and exact source evidence. There is no AI functionality, source connector,
-automated extraction, or automated taxonomy mapping.
+status, and exact source evidence. Phase 1C.1 adds internal extraction-run lifecycle
+and structured-output validation. There is no provider implementation, LLM call,
+source connector, automated extraction, or automated taxonomy mapping.
 
 ```mermaid
 flowchart TD
@@ -36,14 +37,18 @@ app/
   db/session.py            # Per-request async session
   db/models/raw_document.py
   db/models/security_finding.py
+  db/models/extraction_run.py
   db/models/finding_evidence.py
   schemas/documents.py     # Request and response validation
   schemas/findings.py      # Finding fields, source labels, evidence, and offsets
   services/documents.py    # Hashing, transactions, duplicate handling
   services/findings.py     # Atomic creation and exact evidence verification
   taxonomy/categories.py  # Stable application-level vocabularies
+  extraction/schemas.py   # Provenance metadata and untrusted structured output
+  extraction/transitions.py # Run states and permitted transitions
+  extraction/service.py   # Locked lifecycle and atomic completion
   main.py                  # Lifecycle and sanitized error handlers
-alembic/                   # Migration environment and initial migration
+alembic/                   # Migration environment and published revision chain
 tests/                     # Unit and real PostgreSQL integration coverage
 docs/                      # Contracts, architecture, and planned direction
 ```
@@ -129,3 +134,29 @@ pytest suite. Outdated lockfiles fail instead of being regenerated.
 
 The workflow has read-only repository permissions and cancels superseded runs
 for the same PR or ref. It does not deploy, publish releases, or run on tag pushes.
+
+## Internal extraction boundary
+
+Phase 1C.1 exposes four internal functions in `app/extraction/service.py`:
+`create_extraction_run`, `start_extraction_run`, `complete_extraction_run`, and
+`fail_extraction_run`. Call them with a clean, dedicated async session; each owns
+its transaction. Create/start commit separately from completion, preserving the
+run even when a later result is rejected. Keep run UUIDs separately from ORM
+instances: a rolled-back transaction expires loaded objects.
+
+The lifecycle is `PENDING -> RUNNING -> SUCCEEDED | FAILED`. Terminal states cannot
+be reset. A later retry must create a new run with a new UUID; identical provenance
+configurations are allowed. There is no retry mechanism or lifecycle HTTP API.
+
+Completion locks the run with `FOR UPDATE`, refreshing any cached instance, and
+locks its source document for shared access. It revalidates the structured output
+and nested models, checks every exact evidence slice, and uses a single savepoint
+for all candidate findings/evidence. Success commits the entire batch with
+`SUCCEEDED`; rejection discards the batch and commits `FAILED` before raising a
+sanitized domain error. The run lock survives savepoint rollback, so another caller
+cannot complete the same run concurrently.
+
+Provider calls are absent. Phase 1C.2 may supply the structured payload to this
+boundary; no adapter, provider protocol, fake production provider, prompt text,
+HTTP client, or worker is needed now. See [database](database.md#extraction-runs)
+and [security](security.md#extraction-output) for invariants and failure limits.

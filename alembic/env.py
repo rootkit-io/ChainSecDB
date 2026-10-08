@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 from app.core.config import get_settings
 from app.db.base import Base
+from app.db.models.extraction_run import ExtractionRun  # noqa: F401
 from app.db.models.raw_document import RawDocument  # noqa: F401
 from app.db.models.security_finding import SecurityFinding  # noqa: F401
 
