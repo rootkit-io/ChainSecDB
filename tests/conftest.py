@@ -12,7 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from alembic import command
 from app.core.config import Settings
+from app.db.models.raw_document import RawDocument
 from app.main import create_app
+from app.schemas.documents import DocumentCreate
+from app.services.documents import create_document
 
 
 @pytest.fixture(scope="session")
@@ -46,6 +49,7 @@ async def session_factory(database_url: str) -> AsyncIterator[async_sessionmaker
     engine = create_async_engine(database_url, hide_parameters=True)
     try:
         async with engine.begin() as connection:
+            await connection.execute(text("DELETE FROM security_findings"))
             await connection.execute(text("DELETE FROM raw_documents"))
         yield async_sessionmaker(engine, expire_on_commit=False)
     finally:
@@ -78,4 +82,50 @@ def payload() -> dict[str, object]:
         "document_type": " audit_report ",
         "raw_text": " \r\nSecurity report: café 🔐\n\tSELECT * FROM secrets;\n ",
         "retrieved_at": None,
+    }
+
+
+@pytest.fixture
+async def raw_document(session: AsyncSession) -> RawDocument:
+    return await create_document(
+        session,
+        DocumentCreate(
+            source_name="manual",
+            document_type="audit_report",
+            raw_text=(
+                "🔐 Report.\nThe protocol uses the current pool price.\n"
+                "Repeat. Repeat.\nA loss may occur.\n"
+            ),
+        ),
+    )
+
+
+@pytest.fixture
+def finding_payload() -> dict[str, object]:
+    return {
+        "source_finding_id": "H-01",
+        "source_title": " Spot price can be manipulated ",
+        "source_severity": " Major ",
+        "source_category": " Oracle Manipulation ",
+        "title": " Spot-price oracle manipulation ",
+        "severity": "HIGH",
+        "canonical_category": "ORACLE_PRICE_MANIPULATION",
+        "summary": "The protocol trusts a manipulable spot price.",
+        "root_cause": "The price can change within the same transaction.",
+        "impact": "An attacker may borrow against inflated collateral.",
+        "recommendation": "Use a manipulation-resistant oracle.",
+        "affected_contract": "Vault",
+        "affected_function": "borrow",
+        "source_file": "src/Vault.sol",
+        "line_start": 120,
+        "line_end": 138,
+        "protocol_name": "ExampleProtocol",
+        "language": "Solidity",
+        "evidence": [
+            {
+                "evidence_type": "SOURCE_TEXT",
+                "field_name": "root_cause",
+                "source_excerpt": "The protocol uses the current pool price.",
+            }
+        ],
     }

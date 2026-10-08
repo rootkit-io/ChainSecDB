@@ -6,13 +6,14 @@ ChainSecDB is an open-source backend for building structured, verifiable dataset
 from blockchain security research. It preserves original evidence so that future
 findings, classifications, and research can be traced back to their sources.
 
-**Today:** Phase 1A provides validated document ingestion, PostgreSQL persistence,
-SHA-256 deduplication, and retrieval of exact original text.
+**Today:** Phases 1A and 1B provide document ingestion, manually supplied security
+findings, a small canonical taxonomy, and mechanically verified source evidence.
+Original documents remain recoverable in PostgreSQL with SHA-256 deduplication.
 
 **Direction:** connect audit findings, real-world exploits, root causes,
 vulnerability taxonomies, security tooling, and protocol metadata into queryable
-security intelligence. Extraction, normalization, correlation, and AI-assisted
-research are roadmap items; none are implemented yet.
+security intelligence. Automated extraction, cross-source correlation, and
+AI-assisted research remain roadmap items; none are implemented yet.
 
 ## Why ChainSecDB?
 
@@ -33,6 +34,10 @@ evidence remains the source of truth.
   a PostgreSQL uniqueness constraint, including concurrent submissions.
 - Validate requests with Pydantic, bound request bodies, and sanitize errors.
 - Manage schema changes with Alembic and test persistence against real PostgreSQL.
+- Store manually supplied findings with source labels kept separate from canonical
+  categories and normalized severity.
+- Attach exact source excerpts to finding fields and verify their document offsets.
+- Create findings with server-controlled `UNREVIEWED` verification status.
 
 There is no AI extraction yet. The deterministic data layer comes first.
 
@@ -81,6 +86,17 @@ Submitting identical text again returns **409 Conflict**, even if its source
 metadata differs. See the [API contract](docs/api.md) for example responses,
 validation rules, and errors.
 
+### Add structured findings
+
+`POST /documents/{document_id}/findings` creates a finding and its evidence
+atomically. `GET /findings/{id}` retrieves it;
+`GET /documents/{document_id}/findings` lists a document's findings.
+
+Callers supply normalized severity and one of [20 canonical categories](docs/taxonomy.md),
+while original source labels remain unchanged. Source excerpts must match the
+document exactly; repeated excerpts require explicit offsets. See the
+[finding API](docs/api.md#findings) for a complete example.
+
 ## Provenance first
 
 Original evidence and derived interpretation have different roles. Future
@@ -92,7 +108,7 @@ Current request path:
 ```mermaid
 flowchart LR
     API[FastAPI] --> Validation[Pydantic]
-    Validation --> Service[Document service]
+    Validation --> Service[Document and finding services]
     Service --> ORM[Async SQLAlchemy / psycopg]
     ORM --> DB[(PostgreSQL)]
 ```
@@ -102,7 +118,7 @@ flowchart LR
 | Phase | Focus | Status |
 | --- | --- | --- |
 | 1A | Raw documents, source metadata, SHA-256 deduplication, persistence | Implemented |
-| 1B | Structured findings, source/canonical taxonomies, supporting evidence, human verification | Planned |
+| 1B | Manual findings, source/canonical labels, exact evidence, verification status | Implemented |
 | 1C | Evidence-grounded AI extraction, versioned runs, hallucination checks, evaluation | Planned |
 | 2 | Incident intelligence linking findings, root causes, and real exploits | Planned |
 | Later | Cross-source research, semantic discovery, protocol/tool/funding relationships, research agents | Exploratory |
@@ -127,7 +143,7 @@ Future phases build on the provenance guarantees of the ingestion foundation.
 | [Database](docs/database.md) | Table, constraints, transactions, migrations |
 | [Security](docs/security.md) | Trust boundaries, safe handling, current limitations |
 | [Roadmap](docs/roadmap.md) | Phase goals and future research directions |
-| [Taxonomy](docs/taxonomy.md) | Planned preservation and normalization principles |
+| [Taxonomy](docs/taxonomy.md) | Canonical categories, source-label preservation, normalization policy |
 
 ## Status and license
 

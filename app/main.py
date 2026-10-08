@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.documents import router
+from app.api.findings import router as findings_router
 from app.core.body_limit import BodyLimitMiddleware
 from app.core.config import Settings, get_settings
 
@@ -41,6 +42,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application = FastAPI(title="Security Research Documents", lifespan=lifespan)
     application.add_middleware(BodyLimitMiddleware)
     application.include_router(router)
+    application.include_router(findings_router)
 
     @application.exception_handler(SQLAlchemyError)
     async def database_error(request: Request, exc: SQLAlchemyError) -> JSONResponse:
