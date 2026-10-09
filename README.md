@@ -15,8 +15,8 @@ and invocation; HTTP endpoints do not trigger model calls.
 
 **Direction:** connect audit findings, real-world exploits, root causes,
 vulnerability taxonomies, security tooling, and protocol metadata into queryable
-security intelligence. Automated extraction, cross-source correlation, and
-AI-assisted research remain roadmap items; none are implemented yet.
+security intelligence. Public extraction workflows, cross-source correlation,
+and broader AI-assisted research remain roadmap items.
 
 ## Why ChainSecDB?
 
@@ -42,7 +42,8 @@ evidence remains the source of truth.
 - Attach exact source excerpts to finding fields and verify their document offsets.
 - Create findings with server-controlled `UNREVIEWED` verification status.
 
-There is no AI extraction yet. The deterministic data layer comes first.
+Internal OpenAI extraction and an [offline-testable evaluation harness](evals/README.md)
+are available. Real-world extraction quality has not yet been established.
 
 ## Quick start
 
@@ -124,7 +125,7 @@ flowchart LR
 | 1B | Manual findings, source/canonical labels, exact evidence, verification status | Implemented |
 | 1C.1 | Extraction-run provenance and deterministic output validation; no provider calls | Implemented |
 | 1C.2 | Internal OpenAI extraction using exact evidence validation | Implemented |
-| 1C.3 | Extraction evaluation and benchmarking | Planned |
+| 1C.3 | Extraction evaluation harness | Infrastructure implemented; real baseline pending |
 | 2 | Incident intelligence linking findings, root causes, and real exploits | Planned |
 | Later | Cross-source research, semantic discovery, protocol/tool/funding relationships, research agents | Exploratory |
 

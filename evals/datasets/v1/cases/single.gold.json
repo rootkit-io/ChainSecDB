@@ -1,0 +1,17 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Access Control in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "ACCESS_CONTROL",
+      "evidence": [
+        {
+          "source_excerpt": "Anyone can call setFeeRecipient and redirect every future fee payment.",
+          "start_offset": 239,
+          "end_offset": 309
+        }
+      ]
+    }
+  ]
+}

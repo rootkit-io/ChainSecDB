@@ -8,8 +8,8 @@ Phase 1A stores original security documents with provenance and deterministic ha
 Phase 1B stores manually supplied findings, source and canonical labels, review
 status, and exact source evidence. Phase 1C.1 adds internal extraction-run lifecycle
 and structured-output validation. Phase 1C.2 connects one internal OpenAI provider.
-Existing HTTP operations do not call a model. Source connectors, public extraction
-triggers, and extraction evaluation are not implemented.
+Phase 1C.3 adds developer-only evaluation tooling. Existing HTTP operations do not
+call a model. Source connectors and public extraction triggers are not implemented.
 
 ```mermaid
 flowchart TD
@@ -52,10 +52,12 @@ app/
   extraction/providers/openai.py # Lazy config and async Responses adapter
   extraction/prompts.py   # Versioned extraction instructions
   extraction/orchestrator.py # Short transactions around one provider attempt
+  evaluation/              # Corpus validation, isolated runner, matching, metrics, CLI
   main.py                  # Lifecycle and sanitized error handlers
 alembic/                   # Migration environment and published revision chain
 tests/                     # Unit and real PostgreSQL integration coverage
 docs/                      # Contracts, architecture, and planned direction
+evals/                     # Versioned synthetic corpus, offline fixtures, review guide
 ```
 
 ## Lifecycle and transactions
@@ -222,3 +224,18 @@ optional and must use only a tiny synthetic document, never private source mater
 Upstream references: [SDK helpers](https://github.com/openai/openai-python/blob/main/helpers.md),
 [SDK configuration/errors](https://github.com/openai/openai-python#usage), and
 [Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create).
+
+## Developer evaluation
+
+The [evaluation CLI](../evals/README.md) validates a hashed corpus, runs the unchanged
+document-ingestion and extraction orchestrator, then scores persisted findings.
+`EVAL_DATABASE_URL` is required explicitly; a random temporary schema is migrated
+through the existing Alembic chain, isolated from application tables, and dropped
+after evaluation. No production schema, migration, route, or provider behavior changes.
+Validation and fixture scoring need no database or network; live calls require
+`--live` and display selected case/configuration metadata first.
+
+Deterministic IoU matching and optional attributed adjudication produce JSON/Markdown
+artifacts under ignored `evals/runs/`. Unit and PostgreSQL integration tests exercise
+the evaluator offline. The initial synthetic corpus proves harness behavior only;
+human-reviewed real-world quality remains unmeasured.

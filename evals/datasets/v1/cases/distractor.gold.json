@@ -1,0 +1,17 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Liquidation in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "LIQUIDATION",
+      "evidence": [
+        {
+          "source_excerpt": "The liquidation routine compares debt using the wrong decimals and seizes excess collateral.",
+          "start_offset": 386,
+          "end_offset": 478
+        }
+      ]
+    }
+  ]
+}

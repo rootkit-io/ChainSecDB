@@ -1,0 +1,17 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "External Call in reviewed path",
+      "severity": "MEDIUM",
+      "canonical_category": "EXTERNAL_CALL",
+      "evidence": [
+        {
+          "source_excerpt": "The call can fail.",
+          "start_offset": 413,
+          "end_offset": 431
+        }
+      ]
+    }
+  ]
+}

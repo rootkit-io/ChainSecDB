@@ -1,0 +1,56 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Reentrancy in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "REENTRANCY",
+      "evidence": [
+        {
+          "source_excerpt": "withdraw transfers ether before reducing the balance, allowing the recipient to withdraw twice by reentering.",
+          "start_offset": 238,
+          "end_offset": 347
+        }
+      ]
+    },
+    {
+      "gold_id": "g02",
+      "title": "Oracle Price Manipulation in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "ORACLE_PRICE_MANIPULATION",
+      "evidence": [
+        {
+          "source_excerpt": "borrow values collateral with the instantaneous pool price, which a flash loan can inflate.",
+          "start_offset": 561,
+          "end_offset": 652
+        }
+      ]
+    },
+    {
+      "gold_id": "g03",
+      "title": "Arithmetic Precision in reviewed path",
+      "severity": "LOW",
+      "canonical_category": "ARITHMETIC_PRECISION",
+      "evidence": [
+        {
+          "source_excerpt": "The fee calculation rounds down on each deposit, allowing many small deposits to avoid fees.",
+          "start_offset": 860,
+          "end_offset": 952
+        }
+      ]
+    },
+    {
+      "gold_id": "g04",
+      "title": "Upgradeability Initialization in reviewed path",
+      "severity": "MEDIUM",
+      "canonical_category": "UPGRADEABILITY_INITIALIZATION",
+      "evidence": [
+        {
+          "source_excerpt": "The admin upgrade skips storage-layout checks and can overwrite user balances.",
+          "start_offset": 1172,
+          "end_offset": 1250
+        }
+      ]
+    }
+  ]
+}

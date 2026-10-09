@@ -2,7 +2,8 @@
 
 [Project overview](../README.md) · [Taxonomy direction](taxonomy.md)
 
-**Phases 1A, 1B, 1C.1, and 1C.2** are implemented. Subsequent phases are planned or exploratory.
+**Phases 1A, 1B, 1C.1, and 1C.2** are implemented. Phase 1C.3 evaluation infrastructure
+is implemented; its human-reviewed real-world baseline remains pending.
 Each phase should be independently scoped and verified before adding further
 automation.
 
@@ -49,13 +50,22 @@ endpoints remain compatible.
 - Sanitized provider failure mapping and unchanged deterministic evidence checks.
 
 There is no public extraction trigger, queue, worker, retry/reconciliation mechanism,
-or model evaluation. Accepted findings remain `UNREVIEWED`.
+or model tuning. Accepted findings remain `UNREVIEWED`.
 
-## Phase 1C.3 — Extraction evaluation: planned
+## Phase 1C.3 — Extraction evaluation: infrastructure implemented, real baseline pending
 
-- Hallucination checks and explicit uncertainty.
-- Evaluation against human-reviewed findings.
-- Extraction quality and model benchmarking.
+- Versioned dataset/gold contracts and exact document/evidence integrity checks.
+- Deterministic evidence-IoU matching, classification/evidence/reliability metrics,
+  separate synthetic/real and dev/holdout reports, and optional human adjudication.
+- Explicit live CLI using the existing pipeline in a disposable PostgreSQL schema.
+- Twelve original synthetic documents with 21 gold findings and three negative cases.
+- Safe metadata for local Solodit candidates; no copied reports or automatic gold labels.
+
+**Evaluation infrastructure complete; real-world baseline not yet established.**
+Zero human-reviewed real cases are included, and no live quality baseline is claimed.
+The prompt, structured schema, provider behavior, taxonomies, and evidence rules stay
+frozen. Human review and confirmed source-use rights are required before real quality
+claims. See [evaluation](../evals/README.md) for commands, metrics, and known limitations.
 
 Generated classifications, summaries, and findings must never replace source
 material. Deterministic code remains responsible for validation and integrity.

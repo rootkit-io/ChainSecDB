@@ -1,0 +1,17 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Access Control in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "ACCESS_CONTROL",
+      "evidence": [
+        {
+          "source_excerpt": "pause lacks an owner check and any caller can permanently stop withdrawals.",
+          "start_offset": 367,
+          "end_offset": 442
+        }
+      ]
+    }
+  ]
+}
