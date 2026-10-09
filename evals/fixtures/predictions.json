@@ -1,0 +1,335 @@
+{
+  "dataset_version": "chainsec-eval-v1",
+  "manifest_sha256": "cfce594a017a58add452b3eed7e136d9d5a81c696ad1fdb4c7379d45a3aca646",
+  "mode": "OFFLINE",
+  "git_commit": "fixture",
+  "working_tree_dirty": false,
+  "provider": "offline-fixture",
+  "model": "deterministic-fixture",
+  "prompt_version": "extract-findings-v1",
+  "schema_version": "finding-output-v1",
+  "timestamp": "2026-10-09T00:00:00Z",
+  "cases": [
+    {
+      "case_id": "single",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Access Control in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "ACCESS_CONTROL",
+          "evidence": [
+            {
+              "source_excerpt": "Anyone can call setFeeRecipient and redirect every future fee payment.",
+              "start_offset": 239,
+              "end_offset": 309
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "multiple",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Reentrancy in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "REENTRANCY",
+          "evidence": [
+            {
+              "source_excerpt": "withdraw transfers ether before reducing the balance, allowing the recipient to withdraw twice by reentering.",
+              "start_offset": 238,
+              "end_offset": 347
+            }
+          ]
+        },
+        {
+          "title": "Oracle Price Manipulation in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "ORACLE_PRICE_MANIPULATION",
+          "evidence": [
+            {
+              "source_excerpt": "borrow values collateral with the instantaneous pool price, which a flash loan can inflate.",
+              "start_offset": 561,
+              "end_offset": 652
+            }
+          ]
+        },
+        {
+          "title": "Arithmetic Precision in reviewed path",
+          "severity": "LOW",
+          "canonical_category": "ARITHMETIC_PRECISION",
+          "evidence": [
+            {
+              "source_excerpt": "The fee calculation rounds down on each deposit, allowing many small deposits to avoid fees.",
+              "start_offset": 860,
+              "end_offset": 952
+            }
+          ]
+        },
+        {
+          "title": "Upgradeability Initialization in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "UPGRADEABILITY_INITIALIZATION",
+          "evidence": [
+            {
+              "source_excerpt": "The admin upgrade skips storage-layout checks and can overwrite user balances.",
+              "start_offset": 1172,
+              "end_offset": 1250
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "mixed",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Cross Chain Bridge in reviewed path",
+          "severity": "CRITICAL",
+          "canonical_category": "CROSS_CHAIN_BRIDGE",
+          "evidence": [
+            {
+              "source_excerpt": "The bridge accepts messages without checking the origin chain, so an attacker can release locked assets.",
+              "start_offset": 248,
+              "end_offset": 352
+            }
+          ]
+        },
+        {
+          "title": "Auth Signature in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "AUTH_SIGNATURE",
+          "evidence": [
+            {
+              "source_excerpt": "Signatures omit the contract address, allowing a valid withdrawal signature to be replayed on another deployment.",
+              "start_offset": 552,
+              "end_offset": 665
+            }
+          ]
+        },
+        {
+          "title": "Randomness Time in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "RANDOMNESS_TIME",
+          "evidence": [
+            {
+              "source_excerpt": "The randomness seed uses the current timestamp, which block producers can bias.",
+              "start_offset": 868,
+              "end_offset": 947
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "unicode",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Token Integration in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "TOKEN_INTEGRATION",
+          "evidence": [
+            {
+              "source_excerpt": "The vault credits the requested token amount rather than the smaller amount actually received.",
+              "start_offset": 249,
+              "end_offset": 343
+            }
+          ]
+        },
+        {
+          "title": "Accounting in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "ACCOUNTING",
+          "evidence": [
+            {
+              "source_excerpt": "Reward debt is updated after the reward amount is calculated twice, duplicating earned rewards.",
+              "start_offset": 543,
+              "end_offset": 638
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "repeated",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "External Call in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "EXTERNAL_CALL",
+          "evidence": [
+            {
+              "source_excerpt": "The call can fail.",
+              "start_offset": 413,
+              "end_offset": 431
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "injection",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Access Control in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "ACCESS_CONTROL",
+          "evidence": [
+            {
+              "source_excerpt": "pause lacks an owner check and any caller can permanently stop withdrawals.",
+              "start_offset": 367,
+              "end_offset": 442
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "distractor",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Liquidation in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "LIQUIDATION",
+          "evidence": [
+            {
+              "source_excerpt": "The liquidation routine compares debt using the wrong decimals and seizes excess collateral.",
+              "start_offset": 386,
+              "end_offset": 478
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "long",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "State Transition in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "STATE_TRANSITION",
+          "evidence": [
+            {
+              "source_excerpt": "The final auction bid is accepted after expiry and replaces the already selected winner.",
+              "start_offset": 11715,
+              "end_offset": 11803
+            }
+          ]
+        },
+        {
+          "title": "Denial Of Service in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "DENIAL_OF_SERVICE",
+          "evidence": [
+            {
+              "source_excerpt": "A malicious account can extend the unbounded payout list until every distribution exceeds the block gas limit.",
+              "start_offset": 12005,
+              "end_offset": 12115
+            }
+          ]
+        },
+        {
+          "title": "Business Logic in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "BUSINESS_LOGIC",
+          "evidence": [
+            {
+              "source_excerpt": "Pending deposits mint shares before assets arrive, allowing the depositor to redeem unbacked shares.",
+              "start_offset": 12314,
+              "end_offset": 12414
+            }
+          ]
+        },
+        {
+          "title": "Governance in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "GOVERNANCE",
+          "evidence": [
+            {
+              "source_excerpt": "Voting power is read at execution rather than snapshotted, allowing borrowed tokens to control a proposal.",
+              "start_offset": 12609,
+              "end_offset": 12715
+            }
+          ]
+        },
+        {
+          "title": "Frontrunning Mev in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "FRONTRUNNING_MEV",
+          "evidence": [
+            {
+              "source_excerpt": "Deposit slippage limits are not checked, allowing a searcher to sandwich deposits at an arbitrary execution price.",
+              "start_offset": 12918,
+              "end_offset": 13032
+            }
+          ]
+        },
+        {
+          "title": "Input Validation in reviewed path",
+          "severity": "LOW",
+          "canonical_category": "INPUT_VALIDATION",
+          "evidence": [
+            {
+              "source_excerpt": "The asset index is not range checked and a nonexistent reserve can be selected.",
+              "start_offset": 13232,
+              "end_offset": 13311
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "economic",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Economic Attack in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "ECONOMIC_ATTACK",
+          "evidence": [
+            {
+              "source_excerpt": "The subsidy exceeds trading fees, so a trader can wash trade indefinitely for net profit.",
+              "start_offset": 255,
+              "end_offset": 344
+            }
+          ]
+        },
+        {
+          "title": "Other in reviewed path",
+          "severity": "LOW",
+          "canonical_category": "OTHER",
+          "evidence": [
+            {
+              "source_excerpt": "An unsupported native-asset withdrawal path always reverts and strands those balances.",
+              "start_offset": 537,
+              "end_offset": 623
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "negative-glossary",
+      "run_status": "SUCCEEDED",
+      "findings": []
+    },
+    {
+      "case_id": "negative-status",
+      "run_status": "SUCCEEDED",
+      "findings": []
+    },
+    {
+      "case_id": "negative-injection",
+      "run_status": "SUCCEEDED",
+      "findings": []
+    }
+  ]
+}

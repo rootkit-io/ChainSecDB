@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Economic Attack in reviewed path",
+      "severity": "MEDIUM",
+      "canonical_category": "ECONOMIC_ATTACK",
+      "evidence": [
+        {
+          "source_excerpt": "The subsidy exceeds trading fees, so a trader can wash trade indefinitely for net profit.",
+          "start_offset": 255,
+          "end_offset": 344
+        }
+      ]
+    },
+    {
+      "gold_id": "g02",
+      "title": "Other in reviewed path",
+      "severity": "LOW",
+      "canonical_category": "OTHER",
+      "evidence": [
+        {
+          "source_excerpt": "An unsupported native-asset withdrawal path always reverts and strands those balances.",
+          "start_offset": 537,
+          "end_offset": 623
+        }
+      ]
+    }
+  ]
+}

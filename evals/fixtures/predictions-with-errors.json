@@ -1,0 +1,104 @@
+{
+  "dataset_version": "chainsec-eval-v1",
+  "manifest_sha256": "cfce594a017a58add452b3eed7e136d9d5a81c696ad1fdb4c7379d45a3aca646",
+  "mode": "OFFLINE",
+  "git_commit": "fixture",
+  "working_tree_dirty": false,
+  "provider": "offline-fixture",
+  "model": "deterministic-fixture",
+  "prompt_version": "extract-findings-v1",
+  "schema_version": "finding-output-v1",
+  "timestamp": "2026-10-09T00:00:00Z",
+  "cases": [
+    {
+      "case_id": "single",
+      "run_status": "FAILED",
+      "findings": [],
+      "failure_code": "PROVIDER_TIMEOUT"
+    },
+    {
+      "case_id": "multiple",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Reentrancy in reviewed path",
+          "severity": "LOW",
+          "canonical_category": "OTHER",
+          "evidence": [
+            {
+              "source_excerpt": "withdraw transfers ether before reducing the balance, allowing the recipient to withdraw twice by reentering.",
+              "start_offset": 238,
+              "end_offset": 347
+            }
+          ]
+        },
+        {
+          "title": "Oracle Price Manipulation in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "ORACLE_PRICE_MANIPULATION",
+          "evidence": [
+            {
+              "source_excerpt": "borrow values collateral with the instantaneous pool price, which a flash loan can inflate.",
+              "start_offset": 561,
+              "end_offset": 652
+            }
+          ]
+        },
+        {
+          "title": "Arithmetic Precision in reviewed path",
+          "severity": "LOW",
+          "canonical_category": "ARITHMETIC_PRECISION",
+          "evidence": [
+            {
+              "source_excerpt": "The fee calculation rounds down on each deposit, allowing many small deposits to avoid fees.",
+              "start_offset": 860,
+              "end_offset": 952
+            }
+          ]
+        },
+        {
+          "title": "Upgradeability Initialization in reviewed path",
+          "severity": "MEDIUM",
+          "canonical_category": "UPGRADEABILITY_INITIALIZATION",
+          "evidence": [
+            {
+              "source_excerpt": "The admin upgrade skips storage-layout checks and can overwrite user balances.",
+              "start_offset": 1172,
+              "end_offset": 1250
+            }
+          ]
+        },
+        {
+          "title": "Reentrancy in reviewed path",
+          "severity": "HIGH",
+          "canonical_category": "REENTRANCY",
+          "evidence": [
+            {
+              "source_excerpt": "withdraw transfers ether before reducing the balance, allowing the recipient to withdraw twice by reentering.",
+              "start_offset": 238,
+              "end_offset": 347
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "negative-glossary",
+      "run_status": "SUCCEEDED",
+      "findings": [
+        {
+          "title": "Fictional fixture false positive",
+          "severity": "LOW",
+          "canonical_category": "OTHER",
+          "evidence": [
+            {
+              "source_excerpt": "Security glossary",
+              "start_offset": 2,
+              "end_offset": 19
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

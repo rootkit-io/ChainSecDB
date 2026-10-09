@@ -175,3 +175,24 @@ Compose binds PostgreSQL to localhost and uses development example credentials.
 Supply real deployment configuration through the environment. The current phase
 does not provide access control, a public deployment setup, or an independent
 security certification.
+
+## Evaluation boundary
+
+Developer-only evaluation requires explicit `--live` before any model request.
+`EVAL_DATABASE_URL` never falls back to application configuration. Evaluation creates,
+migrates, uses, and drops only its random schema; no public evaluation API exists.
+Use a dedicated evaluation role/database. A killed process or failed cleanup can leave
+an orphaned `chainsec_eval_*` schema requiring manual removal.
+
+Every document and gold file is hashed and validated before selecting cases or
+constructing a provider. Source text remains untrusted and is processed through the
+unchanged extraction boundary. No benchmark tuning, retries, tools, or extra providers
+are enabled. Normal tests block real HTTP transports.
+
+Generated predictions/reports remain under gitignored `evals/runs/`. They contain
+normalized persisted findings and source-derived evidence, never credentials, headers,
+raw SDK errors/responses, or hidden reasoning. Treat them according to source-use rights.
+`LOCAL_ONLY` raw documents and gold excerpts must remain outside this repository.
+The repository stores only safe candidate provenance; Solodit annotations are not
+automatically ground truth. Reviewed real cases alone contribute to real-world headline
+metrics. See [evaluation](../evals/README.md) for review, licensing, and metric rules.

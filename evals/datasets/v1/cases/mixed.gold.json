@@ -1,0 +1,43 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Cross Chain Bridge in reviewed path",
+      "severity": "CRITICAL",
+      "canonical_category": "CROSS_CHAIN_BRIDGE",
+      "evidence": [
+        {
+          "source_excerpt": "The bridge accepts messages without checking the origin chain, so an attacker can release locked assets.",
+          "start_offset": 248,
+          "end_offset": 352
+        }
+      ]
+    },
+    {
+      "gold_id": "g02",
+      "title": "Auth Signature in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "AUTH_SIGNATURE",
+      "evidence": [
+        {
+          "source_excerpt": "Signatures omit the contract address, allowing a valid withdrawal signature to be replayed on another deployment.",
+          "start_offset": 552,
+          "end_offset": 665
+        }
+      ]
+    },
+    {
+      "gold_id": "g03",
+      "title": "Randomness Time in reviewed path",
+      "severity": "MEDIUM",
+      "canonical_category": "RANDOMNESS_TIME",
+      "evidence": [
+        {
+          "source_excerpt": "The randomness seed uses the current timestamp, which block producers can bias.",
+          "start_offset": 868,
+          "end_offset": 947
+        }
+      ]
+    }
+  ]
+}

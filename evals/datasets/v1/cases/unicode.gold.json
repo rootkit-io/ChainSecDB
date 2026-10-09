@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "gold_id": "g01",
+      "title": "Token Integration in reviewed path",
+      "severity": "HIGH",
+      "canonical_category": "TOKEN_INTEGRATION",
+      "evidence": [
+        {
+          "source_excerpt": "The vault credits the requested token amount rather than the smaller amount actually received.",
+          "start_offset": 249,
+          "end_offset": 343
+        }
+      ]
+    },
+    {
+      "gold_id": "g02",
+      "title": "Accounting in reviewed path",
+      "severity": "MEDIUM",
+      "canonical_category": "ACCOUNTING",
+      "evidence": [
+        {
+          "source_excerpt": "Reward debt is updated after the reward amount is calculated twice, duplicating earned rewards.",
+          "start_offset": 543,
+          "end_offset": 638
+        }
+      ]
+    }
+  ]
+}

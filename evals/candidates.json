@@ -1,0 +1,53 @@
+{
+  "reference_repository": "https://github.com/solodit/solodit_content",
+  "candidates": [
+    {
+      "candidate_id": "solodit-local-01",
+      "source_name": "solodit_content",
+      "source_url": "https://github.com/solodit/solodit_content/blob/0be75be262b17472d7a2a857c6343b892eec86f7/reports/0x52/2023-10-07-Dynamo.md",
+      "reference_commit": "0be75be262b17472d7a2a857c6343b892eec86f7",
+      "reference_path": "reports/0x52/2023-10-07-Dynamo.md",
+      "document_sha256": "9630227328eb94bcf22cab721cec4f5869d0aeb16b0e8fa9a8ccd3c892612343",
+      "observed_at": "2026-10-09T01:01:21.762921+00:00",
+      "bytes": 11034,
+      "finding_heading_count": 9,
+      "redistribution_status": "LOCAL_ONLY",
+      "human_reviewed": false,
+      "license_or_terms_note": "No license or redistribution terms found in this pinned repository tree. Upstream report rights and allowed local evaluation use remain unconfirmed.",
+      "local_source_descriptor": "Pinned Git blob in ../references/solodit_content; no report copied into ChainSecDB.",
+      "notes": "Candidate only. Heading counts are structural observations, not verified gold findings. Not included in chainsec-eval-v1 or headline metrics."
+    },
+    {
+      "candidate_id": "solodit-local-02",
+      "source_name": "solodit_content",
+      "source_url": "https://github.com/solodit/solodit_content/blob/0be75be262b17472d7a2a857c6343b892eec86f7/reports/CODESPECT/2025-04-23-TokenTable-ECDSA-Distributor.md",
+      "reference_commit": "0be75be262b17472d7a2a857c6343b892eec86f7",
+      "reference_path": "reports/CODESPECT/2025-04-23-TokenTable-ECDSA-Distributor.md",
+      "document_sha256": "6159263aa966760f565215ba5a5076da5483428b55a7aa3146bd4988e4c7df16",
+      "observed_at": "2026-10-09T01:01:21.778878+00:00",
+      "bytes": 4440,
+      "finding_heading_count": 3,
+      "redistribution_status": "LOCAL_ONLY",
+      "human_reviewed": false,
+      "license_or_terms_note": "No license or redistribution terms found in this pinned repository tree. Upstream report rights and allowed local evaluation use remain unconfirmed.",
+      "local_source_descriptor": "Pinned Git blob in ../references/solodit_content; no report copied into ChainSecDB.",
+      "notes": "Candidate only. Heading counts are structural observations, not verified gold findings. Not included in chainsec-eval-v1 or headline metrics."
+    },
+    {
+      "candidate_id": "solodit-local-03",
+      "source_name": "solodit_content",
+      "source_url": "https://github.com/solodit/solodit_content/blob/0be75be262b17472d7a2a857c6343b892eec86f7/reports/AuditOne/2022-12-14-Unicrow.md",
+      "reference_commit": "0be75be262b17472d7a2a857c6343b892eec86f7",
+      "reference_path": "reports/AuditOne/2022-12-14-Unicrow.md",
+      "document_sha256": "039246175a5891ba5c33b99e3d3c3395c8dad209bce8309e478281a0e4ef140a",
+      "observed_at": "2026-10-09T01:01:21.793782+00:00",
+      "bytes": 14071,
+      "finding_heading_count": 25,
+      "redistribution_status": "LOCAL_ONLY",
+      "human_reviewed": false,
+      "license_or_terms_note": "No license or redistribution terms found in this pinned repository tree. Upstream report rights and allowed local evaluation use remain unconfirmed.",
+      "local_source_descriptor": "Pinned Git blob in ../references/solodit_content; no report copied into ChainSecDB.",
+      "notes": "Candidate only. Heading counts are structural observations, not verified gold findings. Not included in chainsec-eval-v1 or headline metrics."
+    }
+  ]
+}
