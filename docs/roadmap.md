@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Taxonomy direction](taxonomy.md)
 
-**Phases 1A, 1B, and 1C.1** are implemented. Subsequent phases are planned or exploratory.
+**Phases 1A, 1B, 1C.1, and 1C.2** are implemented. Subsequent phases are planned or exploratory.
 Each phase should be independently scoped and verified before adding further
 automation.
 
@@ -37,15 +37,25 @@ from normalization. There is no review workflow or automated classification.
 - Atomic persistence of accepted findings as `UNREVIEWED`, linked to their extraction run.
 - Sanitized failed-run provenance and retry-by-new-run policy; no retry automation.
 
-No provider is implemented and no LLM is called. This is a deterministic internal
-foundation, not functioning AI extraction. Manual Phase 1B endpoints remain compatible.
+This deterministic foundation itself makes no provider calls. Manual Phase 1B
+endpoints remain compatible.
 
-## Phase 1C.2–1C.3 — Provider integration and evaluation: planned
+## Phase 1C.2 — First extraction provider: implemented
 
-- Structured, evidence-grounded LLM extraction.
-- A real provider implementation using the versioned extraction-run boundary.
+- One internal OpenAI provider using async Responses structured parsing.
+- Lazy API-key/model configuration, bounded timeout, and no automatic retries.
+- Versioned prompt and schema provenance; source text stays unmodified.
+- Orchestration with short transactions and no database locks during provider calls.
+- Sanitized provider failure mapping and unchanged deterministic evidence checks.
+
+There is no public extraction trigger, queue, worker, retry/reconciliation mechanism,
+or model evaluation. Accepted findings remain `UNREVIEWED`.
+
+## Phase 1C.3 — Extraction evaluation: planned
+
 - Hallucination checks and explicit uncertainty.
 - Evaluation against human-reviewed findings.
+- Extraction quality and model benchmarking.
 
 Generated classifications, summaries, and findings must never replace source
 material. Deterministic code remains responsible for validation and integrity.

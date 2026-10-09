@@ -7,8 +7,9 @@
 Phase 1A stores original security documents with provenance and deterministic hashes.
 Phase 1B stores manually supplied findings, source and canonical labels, review
 status, and exact source evidence. Phase 1C.1 adds internal extraction-run lifecycle
-and structured-output validation. There is no provider implementation, LLM call,
-source connector, automated extraction, or automated taxonomy mapping.
+and structured-output validation. Phase 1C.2 connects one internal OpenAI provider.
+Existing HTTP operations do not call a model. Source connectors, public extraction
+triggers, and extraction evaluation are not implemented.
 
 ```mermaid
 flowchart TD
@@ -47,6 +48,10 @@ app/
   extraction/schemas.py   # Provenance metadata and untrusted structured output
   extraction/transitions.py # Run states and permitted transitions
   extraction/service.py   # Locked lifecycle and atomic completion
+  extraction/providers/base.py # Small provider protocol and sanitized errors
+  extraction/providers/openai.py # Lazy config and async Responses adapter
+  extraction/prompts.py   # Versioned extraction instructions
+  extraction/orchestrator.py # Short transactions around one provider attempt
   main.py                  # Lifecycle and sanitized error handlers
 alembic/                   # Migration environment and published revision chain
 tests/                     # Unit and real PostgreSQL integration coverage
@@ -156,7 +161,64 @@ for all candidate findings/evidence. Success commits the entire batch with
 sanitized domain error. The run lock survives savepoint rollback, so another caller
 cannot complete the same run concurrently.
 
-Provider calls are absent. Phase 1C.2 may supply the structured payload to this
-boundary; no adapter, provider protocol, fake production provider, prompt text,
-HTTP client, or worker is needed now. See [database](database.md#extraction-runs)
-and [security](security.md#extraction-output) for invariants and failure limits.
+Phase 1C.2 supplies provider output through this existing boundary. See
+[database](database.md#extraction-runs) and [security](security.md#extraction-output)
+for invariants and failure limits.
+
+## Internal OpenAI extraction
+
+`ExtractionProvider` describes identity/version metadata and an async `extract`
+operation returning the existing `ExtractionOutput`. `OpenAIExtractionProvider`
+uses the official SDK's `AsyncOpenAI.responses.parse`, passing that same model as
+`text_format`. There is no parallel provider-specific finding schema.
+
+Configuration is loaded only when constructing this provider, from environment or
+`.env`. Application startup and manual endpoints require no OpenAI settings:
+
+| Variable | Behavior |
+| --- | --- |
+| `OPENAI_API_KEY` | Required, nonblank secret; never persisted |
+| `OPENAI_MODEL` | Required, nonblank bounded identifier; no default model |
+| `OPENAI_TIMEOUT_SECONDS` | SDK request timeout; default 180, allowed 1–600 seconds |
+
+The configured model is used for the request and stored as run provenance, alongside
+provider `openai`, prompt `extract-findings-v1`, and schema `finding-output-v1`.
+Semantic changes to instructions or the structured contract require a corresponding
+version bump. Prompt text stays in versioned code, not PostgreSQL.
+
+An internal caller uses the application's session factory (`expire_on_commit=False`):
+
+```python
+provider = OpenAIExtractionProvider()
+run = await extract_document(session_factory, document_id, provider)
+```
+
+The orchestrator validates provenance, creates and starts the run, loads exact source
+text, then closes the database session before awaiting the provider. No PostgreSQL
+transaction, row lock, or checked-out connection spans that network request. A new
+short session completes the run through Phase 1C.1 or records a sanitized provider
+failure. Completion errors propagate without retry or another state transition.
+
+Each attempt uses one SDK request with `max_retries=0`. Default clients are scoped
+to that request and closed afterward; injected clients remain caller-owned.
+Injected clients receive the same timeout/retry policy. Default clients use the
+official OpenAI API URL; `OPENAI_BASE_URL` is not a supported gateway override.
+Instructions use the separate Responses `instructions` field; the unmodified raw
+document is `input`. No tools are supplied. `store=False` disables Responses storage
+for later API retrieval; `truncation="disabled"` rejects oversized context instead
+of silently dropping source text. These settings do not promise zero provider retention.
+
+Refusals, absent parsed output, incomplete responses, SDK failures, and invalid
+structured output become fixed domain failures. No prose salvage, offset repair,
+chunking, automatic retry, or second model request occurs. Cancellation/crash can
+leave `RUNNING` provenance; stale-run reconciliation is not implemented. Database
+commit ambiguity remains the documented Phase 1C.1 limitation.
+
+Normal tests use injected clients/in-memory HTTP transports and real PostgreSQL.
+An autouse fixture removes provider credentials and blocks real HTTP transports;
+CI requires no key or model and makes no provider requests. Live smoke testing is
+optional and must use only a tiny synthetic document, never private source material.
+
+Upstream references: [SDK helpers](https://github.com/openai/openai-python/blob/main/helpers.md),
+[SDK configuration/errors](https://github.com/openai/openai-python#usage), and
+[Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create).

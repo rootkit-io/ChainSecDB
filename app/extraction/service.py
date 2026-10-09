@@ -18,6 +18,11 @@ from app.taxonomy.categories import VerificationStatus
 
 FAILURE_MESSAGES = {
     "PROVIDER_ERROR": "Provider execution failed.",
+    "PROVIDER_TIMEOUT": "Provider request timed out.",
+    "PROVIDER_RATE_LIMIT": "Provider rate limit exceeded.",
+    "PROVIDER_AUTH": "Provider authentication failed.",
+    "PROVIDER_CONNECTION": "Provider connection failed.",
+    "PROVIDER_REFUSAL": "Provider refused extraction.",
     "TIMEOUT": "Extraction execution timed out.",
     "INVALID_OUTPUT": "Structured extraction output is invalid.",
     "EVIDENCE_MISMATCH": "Extraction evidence does not match the source document.",

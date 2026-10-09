@@ -3,6 +3,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.schemas.documents import DocumentCreate, MetadataText
 from app.schemas.findings import EvidenceCreate, FindingFields, Offset
 
+SCHEMA_VERSION = "finding-output-v1"
+
 
 class ExtractionRunCreate(BaseModel):
     model_config = ConfigDict(extra="forbid", revalidate_instances="always")

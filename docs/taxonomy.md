@@ -118,6 +118,7 @@ record migration rather than a silent relabeling.
 
 Future work may refine overlapping categories, multi-category representation,
 source tag lists, explicit crosswalks, and review policy. These choices are not
-implemented now. Phase 1C.1 records versioned extraction-run provenance; provider
-integration and evaluation remain later Phase 1C work. Original evidence remains
+implemented now. Phase 1C.1 records versioned extraction-run provenance, and Phase
+1C.2 adds one internal provider. Extraction evaluation remains later work.
+Original evidence remains
 the source of truth.

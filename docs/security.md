@@ -69,10 +69,11 @@ must retain evidence references and their own verification state.
 
 ## Extraction output
 
-Phase 1C.1 has no provider implementation and makes no LLM calls. Its internal
-service accepts untrusted structured objects, not provider responses or arbitrary
-code. It does not fetch URLs, evaluate text, or execute Solidity. There is no
-HTTP endpoint for starting extraction or manipulating run states.
+The internal Phase 1C.1 service accepts untrusted structured objects, not arbitrary
+code. Phase 1C.2 adds an explicitly invoked OpenAI adapter and orchestrator. Existing
+HTTP endpoints never trigger extraction or model usage; there is no public paid
+extraction endpoint or HTTP operation for manipulating run states. Neither layer
+fetches source URLs, evaluates text, or executes Solidity.
 
 The extraction schema reuses Phase 1B finding fields, enums, and text validation.
 Unknown fields are forbidden, including IDs, lifecycle timestamps, verification
@@ -91,17 +92,62 @@ All persisted findings explicitly begin `UNREVIEWED`, with a run UUID supplied b
 the service. Manual findings keep null run IDs and optional evidence. There is no
 review workflow, automatic verification, or model-controlled status.
 
-Failure recording accepts only six operational codes: `PROVIDER_ERROR`, `TIMEOUT`,
-`INVALID_OUTPUT`, `EVIDENCE_MISMATCH`, `DUPLICATE_SOURCE_FINDING`, and
-`PERSISTENCE_ERROR`. Messages are fixed, bounded strings. Arbitrary exception text,
+Failure recording accepts a small allowlist of operational codes with fixed,
+bounded messages. Existing codes (`PROVIDER_ERROR`, `TIMEOUT`, `INVALID_OUTPUT`,
+`EVIDENCE_MISMATCH`, `DUPLICATE_SOURCE_FINDING`, `PERSISTENCE_ERROR`) remain supported.
+The OpenAI adapter maps failures as follows:
+
+| Condition | Failure code |
+| --- | --- |
+| SDK timeout | `PROVIDER_TIMEOUT` |
+| Rate limit | `PROVIDER_RATE_LIMIT` |
+| Authentication or permission denial | `PROVIDER_AUTH` |
+| Connection failure | `PROVIDER_CONNECTION` |
+| Refusal | `PROVIDER_REFUSAL` |
+| Invalid structured output, missing parsed result, incomplete response | `INVALID_OUTPUT` |
+| Other provider failure, including rejected model/context | `PROVIDER_ERROR` |
+
+Arbitrary exception text,
 provider messages, headers, credentials, environment values, and stack traces are
-not accepted or persisted. Raw model output, hidden reasoning, prompts, and request
-payloads have no storage fields. Provider/model/version strings are caller-declared
-provenance, not independently verified identities or a schema-version dispatcher.
+not accepted or persisted. Raw model responses, hidden reasoning, prompts, and request
+payloads have no storage fields. The OpenAI adapter supplies provider/model/version
+provenance from its configuration and versioned code; those strings do not independently
+prove the upstream model's identity or dispatch a schema version.
 
 The service does not log document bodies, evidence excerpts, or structured output.
 See [transaction failure limits](database.md#extraction-runs) for commit ambiguity
 and runs that may remain `RUNNING` after an outer database failure.
+
+## Provider trust boundary
+
+An explicit internal extraction call sends the entire original document to OpenAI.
+Use only material approved for that external processing. API keys are represented
+as secrets in lazy provider settings and passed only to the SDK client; they are not
+finding fields, run metadata, log values, or API responses. Missing/invalid provider
+configuration raises a fixed error without echoing values. No production key is
+needed by startup or CI.
+
+Extraction instructions are separate from attacker-controlled source text. They
+forbid following instructions embedded in reports, unsupported claims, and altered
+evidence. The request enables no tools, web search, code execution, files, remote
+MCP, or function calling. Source text is sent unchanged, including whitespace,
+line endings, and Unicode. Context overflow fails rather than truncating the report.
+
+Instruction separation reduces prompt-injection risk; it does not prove model
+obedience or semantic correctness. Strict Pydantic parsing and Phase 1C.1's exact
+evidence validation remain authoritative. Provider output cannot set verification
+state; all accepted findings remain `UNREVIEWED`.
+
+The adapter requests `store=False`, never stores raw responses, and does not log
+source text, excerpts, provider bodies, exception dumps, headers, or keys. This
+does not override the provider's data retention policies. Do not enable SDK/HTTP
+debug logging for sensitive documents; dependency debug logs can contain payloads.
+Request IDs are supported upstream but are not logged or stored by this phase.
+
+Provider failures terminate the run with no candidate findings. Network calls occur
+after the database session closes. No automatic retries occur. Abrupt cancellation
+can leave `RUNNING` provenance; an uncertain database commit is surfaced without a
+blind failure transition or repeated completion. Recovery is a later reliability task.
 
 ## Errors and logs
 
