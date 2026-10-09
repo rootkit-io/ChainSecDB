@@ -9,8 +9,9 @@ findings, classifications, and research can be traced back to their sources.
 **Today:** Phases 1A and 1B provide document ingestion, manually supplied security
 findings, a small canonical taxonomy, and mechanically verified source evidence.
 Original documents remain recoverable in PostgreSQL with SHA-256 deduplication.
-Phase 1C.1 adds internal extraction-run provenance and deterministic structured-output
-validation. No model provider is connected and no LLM is called.
+Phase 1C adds extraction-run provenance, deterministic structured-output validation,
+and an internal OpenAI provider. Extraction requires explicit local configuration
+and invocation; HTTP endpoints do not trigger model calls.
 
 **Direction:** connect audit findings, real-world exploits, root causes,
 vulnerability taxonomies, security tooling, and protocol metadata into queryable
@@ -122,7 +123,8 @@ flowchart LR
 | 1A | Raw documents, source metadata, SHA-256 deduplication, persistence | Implemented |
 | 1B | Manual findings, source/canonical labels, exact evidence, verification status | Implemented |
 | 1C.1 | Extraction-run provenance and deterministic output validation; no provider calls | Implemented |
-| 1C.2–1C.3 | Provider integration and extraction evaluation | Planned |
+| 1C.2 | Internal OpenAI extraction using exact evidence validation | Implemented |
+| 1C.3 | Extraction evaluation and benchmarking | Planned |
 | 2 | Incident intelligence linking findings, root causes, and real exploits | Planned |
 | Later | Cross-source research, semantic discovery, protocol/tool/funding relationships, research agents | Exploratory |
 

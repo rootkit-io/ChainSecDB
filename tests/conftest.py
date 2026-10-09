@@ -2,6 +2,8 @@ import os
 from collections.abc import AsyncIterator, Iterator
 from uuid import uuid4
 
+import httpx
+import httpx2
 import pytest
 from alembic.config import Config
 from httpx import ASGITransport, AsyncClient
@@ -17,6 +19,23 @@ from app.extraction.schemas import ExtractionRunCreate
 from app.main import create_app
 from app.schemas.documents import DocumentCreate
 from app.services.documents import create_document
+
+
+@pytest.fixture(autouse=True)
+def isolate_provider_environment_and_network(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_TIMEOUT_SECONDS", "OPENAI_BASE_URL"):
+        monkeypatch.delenv(name, raising=False)
+
+    def forbidden_request(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Tests must not make real HTTP requests")
+
+    async def forbidden_async_request(*args: object, **kwargs: object) -> None:
+        forbidden_request()
+
+    monkeypatch.setattr(httpx.HTTPTransport, "handle_request", forbidden_request)
+    monkeypatch.setattr(httpx.AsyncHTTPTransport, "handle_async_request", forbidden_async_request)
+    monkeypatch.setattr(httpx2.HTTPTransport, "handle_request", forbidden_request)
+    monkeypatch.setattr(httpx2.AsyncHTTPTransport, "handle_async_request", forbidden_async_request)
 
 
 @pytest.fixture(scope="session")
